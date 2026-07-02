@@ -1,0 +1,6 @@
+{
+  "name": "PlanIA CV",
+  "description": "Asistente de planificación docente y distribución de Situaciones de Aprendizaje para Infantil y Primaria en la Comunitat Valenciana.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
