@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #F6F4EE; }
+  * { box-sizing: border-box; }
+  input, select, button, textarea { font-family: 'Public Sans', sans-serif; }
+  input[type="date"] { color-scheme: light; }
+  button { cursor: pointer; }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr !important; padding: 16px !important; }
+    .pcv-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  @media (max-width: 480px) {
+    .pcv-week { grid-template-columns: repeat(3, 1fr) !important; }
+    header { flex-wrap: wrap; row-gap: 10px; padding: 14px 16px !important; }
+    .pcv-stats { grid-template-columns: 1fr !important; }
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  fetch('./estado.json').then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.activo === false) {
+      var o = document.createElement('div');
+      o.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#F6F4EE;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px;font-family:\'Public Sans\',sans-serif';
+      o.innerHTML = '<div style="width:64px;height:64px;border-radius:18px;background:#4A6C87;color:#F6F4EE;display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\',sans-serif;font-weight:800;font-size:32px">P</div>'
+        + '<div style="font-size:17px;color:#4A443A;max-width:26ch;line-height:1.5">PlanIA CV está en pausa temporalmente. Vuelve pronto.</div>'
+        + '<a href="acerca-de.dc.html" style="font-size:13px;font-weight:600;color:#4A6C87;text-decoration:none;padding:8px 16px;border:1px solid #CBDCE6;border-radius:9px;background:#E6EEF3">Acerca de</a>';
+      document.body.appendChild(o);
+    }
+  }).catch(function(){});
+</script>
+</helmet>
+
+<template id="__bundler_thumbnail" data-bg-color="#4A6C87">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#4A6C87"/>
+    <rect x="470" y="250" width="260" height="260" rx="58" fill="#F6F4EE"/>
+    <text x="600" y="465" font-family="Georgia, serif" font-weight="700" font-size="200" text-anchor="middle" fill="#4A6C87">P</text>
+    <text x="600" y="610" font-family="Georgia, serif" font-weight="700" font-size="64" text-anchor="middle" fill="#F6F4EE">PlanIA CV</text>
+  </svg>
+</template>
+
+<div style="font-family:'Public Sans',sans-serif;color:#29251F;min-height:100vh;padding-bottom:48px">
+
+  <!-- Header -->
+  <header data-screen-label="Cabecera" style="display:flex;align-items:center;gap:14px;padding:18px 32px;border-bottom:1px solid #E5E0D3;background:#FBFAF5">
+    <div style="width:36px;height:36px;border-radius:10px;background:#4A6C87;color:#F6F4EE;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">P</div>
+    <div style="display:flex;gap:4px">
+      <sc-for list="{{ idiomaOpts }}" as="o" hint-placeholder-count="2">
+        <button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <div style="display:flex;align-items:center;gap:8px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.01em">PlanIA CV</div><span style="font-size:10px;font-weight:700;letter-spacing:0.06em;background:#E6EEF3;color:#33546A;padding:2px 8px;border-radius:999px">BETA</span></div>
+      <div style="font-size:12px;color:#857D6F">{{ t.tagline }}</div>
+    </div>
+    <div style="flex:1"></div>
+    <nav style="display:flex;gap:8px;align-items:center">
+      <a href="base-documental.dc.html" style="font-size:12.5px;font-weight:600;color:#6B6355;text-decoration:none;padding:7px 12px;border:1px solid #E5E0D3;border-radius:9px;background:#FFFFFF">{{ t.baseDoc }}</a>
+      <a href="acerca-de.dc.html" style="font-size:12.5px;font-weight:600;color:#6B6355;text-decoration:none;padding:7px 12px;border:1px solid #E5E0D3;border-radius:9px;background:#FFFFFF">{{ t.acercaDe }}</a>
+      <a href="mailto:sentia.edu@gmail.com?subject=Feedback%20PlanIA%20CV" style="font-size:12.5px;font-weight:600;color:#6B6355;text-decoration:none;padding:7px 12px;border:1px solid #E5E0D3;border-radius:9px;background:#FFFFFF">{{ t.feedback }}</a>
+    </nav>
+  </header>
+
+  <div data-screen-label="Aviso de protección de datos" style="background:#E6EEF3;color:#33546A;font-size:12px;font-weight:500;text-align:center;padding:8px 32px;line-height:1.5;border-bottom:1px solid #CBDCE6">{{ t.rgpd }}</div>
+
+  <main style="max-width:1480px;margin:0 auto;padding:24px 32px;display:grid;grid-template-columns:minmax(340px,380px) 1fr;gap:22px;align-items:start">
+
+    <!-- ══════════ ASIDE: configuración ══════════ -->
+    <aside style="display:grid;gap:16px">
+
+      <!-- 1 · Contexto -->
+      <section data-screen-label="Contexto" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:22px;height:22px;border-radius:7px;background:#E6EEF3;color:#4A6C87;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px">{{ t.contexto }}</div>
+        </div>
+        <div style="display:grid;gap:10px">
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ etapaOpts }}" as="o" hint-placeholder-count="2">
+              <button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.cursoNivel }}</div>
+              <input value="{{ nivel }}" onChange="{{ onNivel }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:7px 10px;font-size:13px;background:#FCFBF7;color:#29251F">
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ areaLabel }}</div>
+              <select value="{{ area }}" onChange="{{ onArea }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:7px 10px;font-size:13px;background:#FCFBF7;color:#29251F">
+                <sc-for list="{{ areaOpts }}" as="o" hint-placeholder-count="4">
+                  <option value="{{ o }}">{{ o }}</option>
+                </sc-for>
+              </select>
+            </div>
+          </div>
+          <sc-if value="{{ areaEsOtra }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.areaMateria }}</div>
+              <input value="{{ areaCustom }}" onChange="{{ onAreaCustom }}" placeholder="{{ t.escribeArea }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:7px 10px;font-size:13px;background:#FCFBF7;color:#29251F">
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.cursoEscolar }}</div>
+              <input value="{{ cursoEscolar }}" onChange="{{ onCursoEscolar }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:7px 10px;font-size:13px;background:#FCFBF7;color:#29251F">
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.localidad }}</div>
+              <input value="{{ localidad }}" onChange="{{ onLocalidad }}" placeholder="{{ t.opcional }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:7px 10px;font-size:13px;background:#FCFBF7;color:#29251F">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 · Calendario -->
+      <section data-screen-label="Calendario" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:22px;height:22px;border-radius:7px;background:#E6EEF3;color:#4A6C87;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px">{{ t.calendario }}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.inicioLectivo }}</div>
+            <input type="date" value="{{ inicio }}" onChange="{{ onInicio }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:6px 8px;font-size:12.5px;background:#FCFBF7;color:#29251F">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.finLectivo }}</div>
+            <input type="date" value="{{ fin }}" onChange="{{ onFin }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:6px 8px;font-size:12.5px;background:#FCFBF7;color:#29251F">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.fin1 }}</div>
+            <input type="date" value="{{ t1Fin }}" onChange="{{ onT1 }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:6px 8px;font-size:12.5px;background:#FCFBF7;color:#29251F">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:5px">{{ t.fin2 }}</div>
+            <input type="date" value="{{ t2Fin }}" onChange="{{ onT2 }}" style="width:100%;border:1px solid #E5E0D3;border-radius:8px;padding:6px 8px;font-size:12.5px;background:#FCFBF7;color:#29251F">
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin:12px 0 6px">{{ t.festivosVac }}</div>
+        <div style="display:grid;gap:6px">
+          <sc-for list="{{ festivosView }}" as="f" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:6px;background:#FCFBF7;border:1px solid #EEE9DD;border-radius:9px;padding:7px 8px">
+              <input value="{{ f.label }}" onChange="{{ f.onLabel }}" style="border:none;background:transparent;font-size:12.5px;font-weight:600;color:#29251F;padding:0;outline:none;min-width:0">
+              <button onClick="{{ f.remove }}" title="Eliminar" style="border:none;background:transparent;color:#B3AB9C;font-size:14px;line-height:1;padding:0 2px">×</button>
+              <div style="grid-column:1/-1;display:flex;gap:6px;align-items:center">
+                <input type="date" value="{{ f.start }}" onChange="{{ f.onStart }}" style="flex:1;border:1px solid #EEE9DD;border-radius:6px;padding:3px 6px;font-size:11.5px;background:#FFFFFF;color:#6B6355;min-width:0">
+                <span style="color:#B3AB9C;font-size:11px">→</span>
+                <input type="date" value="{{ f.end }}" onChange="{{ f.onEnd }}" style="flex:1;border:1px solid #EEE9DD;border-radius:6px;padding:3px 6px;font-size:11.5px;background:#FFFFFF;color:#6B6355;min-width:0">
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ addFestivo }}" style="margin-top:8px;width:100%;border:1px dashed #D8D2C2;border-radius:9px;background:transparent;color:#857D6F;font-size:12.5px;font-weight:600;padding:7px">{{ t.addFestivo }}</button>
+      </section>
+
+      <!-- 3 · Actividades del centro -->
+      <section data-screen-label="Actividades del centro" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:22px;height:22px;border-radius:7px;background:#E6EEF3;color:#4A6C87;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px">{{ t.actCentro }}</div>
+        </div>
+        <div style="font-size:12px;color:#857D6F;margin-bottom:8px;line-height:1.45">{{ t.actCentroDesc }}</div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <sc-for list="{{ gestionOpts }}" as="o" hint-placeholder-count="2">
+            <button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:grid;gap:6px">
+          <sc-for list="{{ eventosView }}" as="ev" hint-placeholder-count="2">
+            <div style="display:flex;gap:6px;align-items:center;background:#FCFBF7;border:1px solid #EEE9DD;border-radius:9px;padding:7px 8px">
+              <input type="date" value="{{ ev.date }}" onChange="{{ ev.onDate }}" style="border:1px solid #EEE9DD;border-radius:6px;padding:3px 6px;font-size:11.5px;background:#FFFFFF;color:#6B6355;width:118px">
+              <input value="{{ ev.label }}" onChange="{{ ev.onLabel }}" style="flex:1;border:none;background:transparent;font-size:12.5px;font-weight:600;color:#29251F;padding:0;outline:none;min-width:0">
+              <button onClick="{{ ev.remove }}" title="Eliminar" style="border:none;background:transparent;color:#B3AB9C;font-size:14px;line-height:1;padding:0 2px">×</button>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ addEvento }}" style="margin-top:8px;width:100%;border:1px dashed #D8D2C2;border-radius:9px;background:transparent;color:#857D6F;font-size:12.5px;font-weight:600;padding:7px">{{ t.addActividad }}</button>
+      </section>
+
+      <!-- 4 · Horario semanal -->
+      <section data-screen-label="Horario semanal" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:22px;height:22px;border-radius:7px;background:#E6EEF3;color:#4A6C87;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">4</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:15px">{{ t.horarioSemanal }}</div>
+          <div style="flex:1"></div>
+          <div style="font-size:12px;font-weight:700;color:#4A6C87">{{ semanal }} {{ t.sesSemana }}</div>
+        </div>
+        <div class="pcv-week" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px">
+          <sc-for list="{{ weekdays }}" as="w" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;background:#FCFBF7;border:1px solid #EEE9DD;border-radius:9px;padding:8px 4px">
+              <div style="font-size:10.5px;font-weight:700;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ w.label }}</div>
+              <div style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">{{ w.count }}</div>
+              <div style="display:flex;gap:4px">
+                <button onClick="{{ w.dec }}" style="width:20px;height:20px;border-radius:6px;border:1px solid #E5E0D3;background:#FFFFFF;color:#6B6355;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">−</button>
+                <button onClick="{{ w.inc }}" style="width:20px;height:20px;border-radius:6px;border:1px solid #E5E0D3;background:#FFFFFF;color:#6B6355;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ t.duracionSesion }}</div>
+          <select value="{{ duracion }}" onChange="{{ onDuracion }}" style="border:1px solid #E5E0D3;border-radius:8px;padding:6px 8px;font-size:12.5px;background:#FCFBF7;color:#29251F">
+            <option value="45">45 min</option>
+            <option value="50">50 min</option>
+            <option value="60">60 min</option>
+            <option value="90">90 min</option>
+          </select>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- ══════════ MAIN: resultados ══════════ -->
+    <div style="display:grid;gap:16px">
+
+      <!-- Resumen -->
+      <section class="pcv-stats" data-screen-label="Resumen de sesiones" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:16px 18px">
+          <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ t.diasLectivos }}</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">{{ diasLectivos }}</div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:16px 18px">
+          <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ t.sesTeoricas }}</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">{{ teoricas }}</div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:16px 18px">
+          <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ perdidasLabel }}</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">{{ evSesiones }}</div>
+        </div>
+        <div style="background:#29251F;border:1px solid #29251F;border-radius:14px;padding:16px 18px;color:#F6F4EE">
+          <div style="font-size:11px;font-weight:600;color:#B3AB9C;letter-spacing:0.05em;text-transform:uppercase">{{ t.sesDisponibles }}</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">{{ disponibles }}</div>
+        </div>
+      </section>
+
+      <!-- Alertas -->
+      <sc-if value="{{ hasAlerts }}" hint-placeholder-val="{{ true }}">
+        <section data-screen-label="Detector de incoherencias" style="display:grid;gap:8px">
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="1">
+            <div style="{{ a.st }}">{{ a.text }}</div>
+          </sc-for>
+        </section>
+      </sc-if>
+
+      <!-- Trimestres -->
+      <section data-screen-label="Distribución trimestral" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <sc-for list="{{ trimsView }}" as="t" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:16px 18px;display:grid;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:9px;height:9px;border-radius:3px;background:{{ t.color }}"></div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:14.5px">{{ t.nombre }}</div>
+              <div style="flex:1"></div>
+              <div style="font-size:11.5px;color:#857D6F">{{ t.rango }}</div>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">{{ t.disponibles }}</div>
+              <div style="font-size:12px;color:#857D6F">{{ t.diasLabel }}</div>
+            </div>
+            <div style="display:grid;gap:4px">
+              <div style="height:6px;border-radius:4px;background:#F1EEE5;overflow:hidden">
+                <div style="height:100%;border-radius:4px;background:{{ t.color }};width:{{ t.pct }}%"></div>
+              </div>
+              <div style="font-size:11.5px;color:#857D6F">{{ t.asignadasLabel }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </section>
+
+      <!-- SdA -->
+      <section data-screen-label="Situaciones de aprendizaje" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px">{{ t.situaciones }}</div>
+          <div style="flex:1"></div>
+          <div style="font-size:12.5px;color:#857D6F">{{ sdaCountLabel }}</div>
+        </div>
+        <div style="display:grid;gap:8px">
+          <sc-for list="{{ sdasView }}" as="s" hint-placeholder-count="6">
+            <div style="border:1px solid #EEE9DD;border-radius:11px;padding:10px 12px;background:#FCFBF7;display:grid;gap:6px;border-left:4px solid {{ s.color }}">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">
+                  <button onClick="{{ s.moveUp }}" title="Subir" style="{{ s.upSt }}">▲</button>
+                  <button onClick="{{ s.moveDown }}" title="Bajar" style="{{ s.downSt }}">▼</button>
+                </div>
+                <div style="width:26px;height:26px;border-radius:8px;background:{{ s.color }};color:#33302A;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-variant-numeric:tabular-nums">{{ s.n }}</div>
+                <input value="{{ s.titulo }}" onChange="{{ s.onTitulo }}" placeholder="{{ t.nombreSda }}" style="flex:1;border:none;background:transparent;font-size:13.5px;font-weight:600;color:#29251F;padding:0;outline:none;min-width:0">
+                <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+                  <button onClick="{{ s.dec }}" style="width:22px;height:22px;border-radius:6px;border:1px solid #E5E0D3;background:#FFFFFF;color:#6B6355;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">−</button>
+                  <div style="min-width:24px;text-align:center;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums">{{ s.sesiones }}</div>
+                  <button onClick="{{ s.inc }}" style="width:22px;height:22px;border-radius:6px;border:1px solid #E5E0D3;background:#FFFFFF;color:#6B6355;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center">+</button>
+                  <div style="font-size:11.5px;color:#857D6F;margin-right:4px">{{ t.ses }}</div>
+                </div>
+                <div style="font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:20px;flex-shrink:0;{{ s.chipSt }}">{{ s.rango }} · {{ s.trimLabel }}</div>
+                <button onClick="{{ s.remove }}" title="Eliminar SdA" style="border:none;background:transparent;color:#B3AB9C;font-size:15px;line-height:1;padding:0 2px;flex-shrink:0">×</button>
+              </div>
+              <sc-if value="{{ s.hasWarn }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:11.5px;color:#8F2F23;padding-left:36px">⚠ {{ s.warn }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <button onClick="{{ addSda }}" style="margin-top:10px;width:100%;border:1px dashed #D8D2C2;border-radius:10px;background:transparent;color:#857D6F;font-size:13px;font-weight:600;padding:9px">{{ t.addSda }}</button>
+        <div style="margin-top:14px;display:grid;gap:5px">
+          <div style="height:8px;border-radius:5px;background:#F1EEE5;overflow:hidden">
+            <div style="height:100%;border-radius:5px;background:{{ progresoColor }};width:{{ progresoPct }}%"></div>
+          </div>
+          <div style="font-size:12px;color:#857D6F">{{ progresoTexto }}</div>
+        </div>
+      </section>
+
+      <!-- Calendario anual -->
+      <sc-if value="{{ showCal }}" hint-placeholder-val="{{ true }}">
+        <section data-screen-label="Calendario anual" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px">{{ t.calendarioAnual }}</div>
+            <div style="flex:1"></div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:#857D6F"><span style="width:10px;height:10px;border-radius:3px;background:#FFFFFF;border:1px solid #D8D2C2;display:inline-block"></span> {{ t.lectivo }}</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:#857D6F"><span style="width:10px;height:10px;border-radius:3px;background:#D64B3F;display:inline-block"></span> {{ t.festivo }}</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:#857D6F"><span style="width:10px;height:10px;border-radius:3px;background:#2E8B57;display:inline-block"></span> {{ t.actividadCentro }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+            <sc-for list="{{ months }}" as="m" hint-placeholder-count="10">
+              <div style="border:1px solid #EEE9DD;border-radius:11px;padding:10px">
+                <div style="font-size:12px;font-weight:700;color:#6B6355;margin-bottom:7px;text-transform:capitalize">{{ m.label }}</div>
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+                  <sc-for list="{{ m.cells }}" as="c" hint-placeholder-count="35">
+                    <div style="{{ c.st }}">{{ c.d }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid #EEE9DD">
+            <div style="font-size:11px;font-weight:600;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px">{{ t.sdaEnCalendario }}</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px 16px">
+              <sc-for list="{{ calLegend }}" as="lg" hint-placeholder-count="6">
+                <div style="{{ lg.st }}"><span style="width:12px;height:12px;border-radius:4px;flex-shrink:0;background:{{ lg.color }}"></span> {{ lg.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+      </sc-if>
+
+      <!-- Normativa utilizada + exportación -->
+      <section data-screen-label="Normativa y exportación" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px;display:grid;gap:16px">
+        <div style="display:grid;gap:10px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px">{{ t.normativaUtilizada }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ normativaView }}" as="d" hint-placeholder-count="3">
+              <div style="{{ d.st }}"><span style="font-weight:700">{{ d.mark }}</span> {{ d.label }}</div>
+            </sc-for>
+          </div>
+          <div style="font-size:11.5px;color:#857D6F;line-height:1.5">{{ t.normativaNota }}</div>
+        </div>
+        <div style="border-top:1px solid #EEE9DD;padding-top:14px;display:grid;gap:10px">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px">{{ t.exportar }}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <button onClick="{{ onWord }}" style="display:flex;align-items:center;gap:7px;border:1px solid #2B579A;background:#2B579A;color:#FFFFFF;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600">{{ t.btnWord }}</button>
+            <button onClick="{{ onExcel }}" style="display:flex;align-items:center;gap:7px;border:1px solid #217346;background:#217346;color:#FFFFFF;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600">{{ t.btnExcel }}</button>
+            <button onClick="{{ onTextoProg }}" style="display:flex;align-items:center;gap:7px;border:1px solid #29251F;background:#FFFFFF;color:#29251F;border-radius:9px;padding:9px 15px;font-size:13px;font-weight:600">{{ t.btnTexto }}</button>
+          </div>
+          <div style="font-size:11.5px;color:#857D6F;line-height:1.5">{{ exportStatus }}</div>
+        </div>
+      </section>
+
+      <!-- Texto para la programación -->
+      <sc-if value="{{ showTexto }}" hint-placeholder-val="{{ true }}">
+        <section data-screen-label="Texto para la programación" style="background:#FFFFFF;border:1px solid #E5E0D3;border-radius:14px;padding:18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:600;font-size:16px">{{ t.textoProgTitulo }}</div>
+            <div style="flex:1"></div>
+            <button onClick="{{ onCopy }}" style="border:1px solid #29251F;background:#29251F;color:#F6F4EE;border-radius:9px;padding:7px 14px;font-size:12.5px;font-weight:600">{{ copiarLabel }}</button>
+          </div>
+          <pre style="margin:0;white-space:pre-wrap;font-family:'Public Sans',sans-serif;font-size:12.5px;line-height:1.65;color:#4A443A;background:#FCFBF7;border:1px solid #EEE9DD;border-radius:11px;padding:14px 16px">{{ textoProg }}</pre>
+        </section>
+      </sc-if>
+
+      <div style="font-size:11.5px;color:#B3AB9C;text-align:center;line-height:1.5">{{ footer1 }}<br>{{ footer2 }}</div>
+
+    </div>
+  </main>
+
+  <footer style="max-width:1480px;margin:24px auto 0;padding:18px 32px 0;border-top:1px solid #E5E0D3;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13px;color:#29251F">PlanIA CV</div>
+    <div style="font-size:12px;color:#857D6F">{{ t.creadoPor }}</div>
+    <div style="flex:1"></div>
+    <div style="font-size:12px;color:#4A6C87;font-style:italic">{{ t.proyecto }}</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;mostrarCalendario&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Vista&quot; },
+  &quot;mostrarTextoProgramacion&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Vista&quot; },
+  &quot;umbralReserva&quot;: { &quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 10, &quot;min&quot;: 5, &quot;max&quot;: 25, &quot;step&quot;: 1, &quot;unit&quot;: &quot;%&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Comprobaciones&quot; }
+}">
+class Component extends DCLogic {
+  state = {
+    idioma: 'es',
+    etapa: 'primaria',
+    nivel: '3º de Primaria',
+    area: 'Matemáticas',
+    areaCustom: '',
+    localidad: '',
+    cursoEscolar: '2026-2027',
+    inicio: '2026-09-10',
+    fin: '2027-06-18',
+    t1Fin: '2026-12-22',
+    t2Fin: '2027-03-24',
+    festivos: [
+      { id: 1, label: 'Dia de la Comunitat Valenciana', start: '2026-10-09', end: '2026-10-09' },
+      { id: 2, label: 'Fiesta Nacional', start: '2026-10-12', end: '2026-10-12' },
+      { id: 3, label: 'Puente de diciembre', start: '2026-12-07', end: '2026-12-08' },
+      { id: 4, label: 'Vacaciones de Navidad', start: '2026-12-23', end: '2027-01-06' },
+      { id: 5, label: 'Vacaciones de Pascua', start: '2027-03-25', end: '2027-04-05' }
+    ],
+    eventos: [
+      { id: 1, date: '2026-11-27', label: 'Jornada deportiva' },
+      { id: 2, date: '2027-04-23', label: 'Día del libro · actividades de centro' }
+    ],
+    gestion: 'descontar',
+    sesionesDia: { 1: 1, 2: 1, 3: 1, 4: 0, 5: 1 },
+    duracion: 45,
+    sdas: [
+      { id: 1, titulo: 'Números hasta el 10.000', sesiones: 16 },
+      { id: 2, titulo: 'Suma y resta con estrategias de cálculo', sesiones: 12 },
+      { id: 3, titulo: 'Geometría en el patio', sesiones: 12 },
+      { id: 4, titulo: 'La multiplicación', sesiones: 16 },
+      { id: 5, titulo: 'Medida: longitud y masa', sesiones: 14 },
+      { id: 6, titulo: 'La división y el reparto', sesiones: 16 },
+      { id: 7, titulo: 'Tiempo y dinero', sesiones: 12 },
+      { id: 8, titulo: 'Fracciones en la cocina', sesiones: 14 },
+      { id: 9, titulo: 'Datos, azar y probabilidad', sesiones: 14 }
+    ],
+    copied: false,
+    exportStatus: 'Los archivos incluyen automáticamente la autoría: David Martínez López · Proyecto Sentia.',
+    normativa: { d106: true, d96: true, cal: true },
+    centro: []
+  };
+
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem('planiacv_normativa');
+      if (raw) this.setState({ normativa: { ...this.state.normativa, ...JSON.parse(raw) } });
+      const rc = localStorage.getItem('planiacv_centro');
+      if (rc) this.setState({ centro: JSON.parse(rc) });
+      const idi = localStorage.getItem('planiacv_idioma');
+      if (idi === 'es' || idi === 'va') this.setState({ idioma: idi });
+    } catch (e) {}
+    this._onStorage = e => {
+      if (e.key === 'planiacv_normativa' && e.newValue) {
+        try { this.setState({ normativa: JSON.parse(e.newValue) }); } catch (err) {}
+      }
+      if (e.key === 'planiacv_centro' && e.newValue) {
+        try { this.setState({ centro: JSON.parse(e.newValue) }); } catch (err) {}
+      }
+      if (e.key === 'planiacv_idioma' && (e.newValue === 'es' || e.newValue === 'va')) {
+        this.setState({ idioma: e.newValue });
+      }
+    };
+    window.addEventListener('storage', this._onStorage);
+  }
+  componentWillUnmount() { if (this._onStorage) window.removeEventListener('storage', this._onStorage); }
+
+  _download(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }
+
+  INFANTIL_AREAS_ES = ['Crecimiento en armonía', 'Descubrimiento y exploración del entorno', 'Comunicación y representación de la realidad'];
+  INFANTIL_AREAS_VA = ['Creixement en harmonia', 'Descobriment i exploració de l\'entorn', 'Comunicació i representació de la realitat'];
+  PRIMARIA_AREAS_ES = ['Lengua Castellana y Literatura', 'Valencià: Llengua i Literatura', 'Matemáticas', 'Conocimiento del Medio Natural, Social y Cultural', 'Primera Lengua Extranjera (Inglés)', 'Segunda Lengua Extranjera', 'Educación Física', 'Educación Artística: Plástica, Visual y Audiovisual', 'Educación Artística: Música y Danza', 'Educación en Valores Cívicos y Éticos', 'Religión'];
+  PRIMARIA_AREAS_VA = ['Llengua Castellana i Literatura', 'Valencià: Llengua i Literatura', 'Matemàtiques', 'Coneixement del Medi Natural, Social i Cultural', 'Primera Llengua Estrangera (Anglés)', 'Segona Llengua Estrangera', 'Educació Física', 'Educació Artística: Plàstica, Visual i Audiovisual', 'Educació Artística: Música i Dansa', 'Educació en Valors Cívics i Ètics', 'Religió'];
+  areasFor(etapa, idioma) {
+    const va = idioma === 'va';
+    if (etapa === 'infantil') return va ? this.INFANTIL_AREAS_VA : this.INFANTIL_AREAS_ES;
+    return va ? this.PRIMARIA_AREAS_VA : this.PRIMARIA_AREAS_ES;
+  }
+  setEtapa(etapa) { return () => this.setState(s => s.etapa === etapa ? {} : { etapa, area: this.areasFor(etapa, s.idioma)[0] }); }
+
+  _uid() { this._n = (this._n || 100) + 1; return this._n; }
+  parse(s) { const p = (s || '').split('-').map(Number); return new Date(p[0], (p[1] || 1) - 1, p[2] || 1); }
+  iso(d) { const z = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+  fmt(s) { if (!s) return '—'; const M = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; const d = this.parse(s); if (isNaN(d)) return '—'; return d.getDate() + ' ' + M[d.getMonth()]; }
+  set(k) { return e => this.setState({ [k]: e.target.value }); }
+  upd(list, id, k) { return e => { const v = e.target.value; this.setState(s => ({ [list]: s[list].map(x => x.id === id ? { ...x, [k]: v } : x) })); }; }
+  del(list, id) { return () => this.setState(s => ({ [list]: s[list].filter(x => x.id !== id) })); }
+
+  renderVals() {
+    const st = this.state;
+    const showCal = this.props.mostrarCalendario ?? true;
+    const showTexto = this.props.mostrarTextoProgramacion ?? true;
+    const umbral = this.props.umbralReserva ?? 10;
+    const MS = 86400000;
+
+    // ── Diccionario de traducción
+    const T = {
+      es: {
+        tagline: 'Temporalización anual · Educación Infantil y Primaria · Comunitat Valenciana',
+        baseDoc: 'Base documental', acercaDe: 'Acerca de', feedback: '¿Feedback?',
+        rgpd: 'No introduzca nombres de alumnos ni datos personales. PlanIA CV trabaja exclusivamente con información curricular y organizativa.',
+        contexto: 'Contexto', cursoNivel: 'Curso / nivel', areaMateria: 'Área / materia',
+        escribeArea: 'Escribe el área o materia', otraEsp: 'Otra (especificar)',
+        cursoEscolar: 'Curso escolar', localidad: 'Localidad', opcional: 'Opcional',
+        infantil: 'Infantil', primaria: 'Primaria',
+        calendario: 'Calendario', inicioLectivo: 'Inicio lectivo', finLectivo: 'Fin lectivo',
+        fin1: 'Fin 1r trimestre', fin2: 'Fin 2º trimestre', festivosVac: 'Festivos y vacaciones',
+        addFestivo: '+ Añadir festivo local o puente', festivoLocalDef: 'Festivo local',
+        actCentro: 'Actividades del centro', actCentroDesc: 'Excursiones, semana cultural, jornadas deportivas, celebraciones…',
+        descontarSes: 'Descontar sesiones', integrarSda: 'Integrar en las SdA',
+        addActividad: '+ Añadir actividad', nuevaActividad: 'Nueva actividad',
+        horarioSemanal: 'Horario semanal', sesSemana: 'ses./semana', duracionSesion: 'Duración de sesión',
+        diasLectivos: 'Días lectivos', sesTeoricas: 'Sesiones teóricas', sesDisponibles: 'Sesiones disponibles',
+        sesDescontadas: 'Ses. descontadas', sesIntegradas: 'Ses. integradas',
+        sesLectDias: dias => 'sesiones · ' + dias + ' días lectivos', asignadasSda: n => n + ' asignadas a SdA',
+        situaciones: 'Situaciones de aprendizaje', deAsignadas: (a, b) => a + ' de ' + b + ' sesiones asignadas',
+        nombreSda: 'Escribe el nombre de la SdA', addSda: '+ Añadir situación de aprendizaje',
+        nuevaSda: 'Nueva situación de aprendizaje', ses: 'ses.',
+        calendarioAnual: 'Calendario anual', lectivo: 'Lectivo', festivo: 'Festivo', actividadCentro: 'Actividad de centro',
+        sdaEnCalendario: 'Situaciones de aprendizaje en el calendario',
+        normativaUtilizada: 'Normativa utilizada',
+        normativaNota: 'Se marca automáticamente la normativa que consta como consultada en la Base documental. Cuando una respuesta se apoya en normativa, PlanIA CV la cita y no inventa disposiciones no cargadas.',
+        documentosCentro: 'Documentos de Centro', exportar: 'Exportar',
+        btnWord: '📄 Exportar Word', btnExcel: '📊 Exportar Excel', btnTexto: '📘 Generar texto para Programación Anual',
+        textoProgTitulo: 'Texto para la Programación Anual', copiarTexto: 'Copiar texto', copiado: 'Copiado ✓',
+        footerDisclaimer: 'PlanIA CV apoya la toma de decisiones pedagógicas; no sustituye el criterio profesional docente.<br>Contrasta fechas y cómputos con la normativa vigente y las resoluciones oficiales de la Conselleria.',
+        creadoPor: 'Creado por David Martínez López · 2026', proyecto: 'Proyecto Sentia: Sentir, enseñar, transformar',
+        dias: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie']
+      },
+      va: {
+        tagline: 'Temporalització anual · Educació Infantil i Primària · Comunitat Valenciana',
+        baseDoc: 'Base documental', acercaDe: 'Quant a', feedback: 'Comentaris?',
+        rgpd: 'No introduïsca noms d\'alumnes ni dades personals. PlanIA CV treballa exclusivament amb informació curricular i organitzativa.',
+        contexto: 'Context', cursoNivel: 'Curs / nivell', areaMateria: 'Àrea / matèria',
+        escribeArea: 'Escriu l\'àrea o matèria', otraEsp: 'Altra (especifica-la)',
+        cursoEscolar: 'Curs escolar', localidad: 'Localitat', opcional: 'Opcional',
+        infantil: 'Infantil', primaria: 'Primària',
+        calendario: 'Calendari', inicioLectivo: 'Inici lectiu', finLectivo: 'Final lectiu',
+        fin1: 'Final 1r trimestre', fin2: 'Final 2n trimestre', festivosVac: 'Festius i vacances',
+        addFestivo: '+ Afig festiu local o pont', festivoLocalDef: 'Festiu local',
+        actCentro: 'Activitats del centre', actCentroDesc: 'Eixides, setmana cultural, jornades esportives, celebracions…',
+        descontarSes: 'Descomptar sessions', integrarSda: 'Integrar en les SA',
+        addActividad: '+ Afig activitat', nuevaActividad: 'Nova activitat',
+        horarioSemanal: 'Horari setmanal', sesSemana: 'sess./setmana', duracionSesion: 'Duració de la sessió',
+        diasLectivos: 'Dies lectius', sesTeoricas: 'Sessions teòriques', sesDisponibles: 'Sessions disponibles',
+        sesDescontadas: 'Sess. descomptades', sesIntegradas: 'Sess. integrades',
+        sesLectDias: dias => 'sessions · ' + dias + ' dies lectius', asignadasSda: n => n + ' assignades a SA',
+        situaciones: 'Situacions d\'Aprenentatge', deAsignadas: (a, b) => a + ' de ' + b + ' sessions assignades',
+        nombreSda: 'Escriu el nom de la SA', addSda: '+ Afig situació d\'aprenentatge',
+        nuevaSda: 'Nova situació d\'aprenentatge', ses: 'sess.',
+        calendarioAnual: 'Calendari anual', lectivo: 'Lectiu', festivo: 'Festiu', actividadCentro: 'Activitat de centre',
+        sdaEnCalendario: 'Situacions d\'aprenentatge en el calendari',
+        normativaUtilizada: 'Normativa utilitzada',
+        normativaNota: 'Es marca automàticament la normativa que consta com a consultada en la Base documental. Quan una resposta es recolza en normativa, PlanIA CV la cita i no inventa disposicions no carregades.',
+        documentosCentro: 'Documents de Centre', exportar: 'Exportar',
+        btnWord: '📄 Exportar Word', btnExcel: '📊 Exportar Excel', btnTexto: '📘 Generar text per a la Programació Anual',
+        textoProgTitulo: 'Text per a la Programació Anual', copiarTexto: 'Copiar text', copiado: 'Copiat ✓',
+        footerDisclaimer: 'PlanIA CV dóna suport a la presa de decisions pedagògiques; no substitueix el criteri professional docent.<br>Contrasta dates i còmputs amb la normativa vigent i les resolucions oficials de la Conselleria.',
+        creadoPor: 'Creat per David Martínez López · 2026', proyecto: 'Projecte Sentia: Sentir, ensenyar, transformar',
+        dias: ['Dl', 'Dt', 'Dc', 'Dj', 'Dv']
+      }
+    };
+    const va = st.idioma === 'va';
+    const tx = T[st.idioma];
+
+    // ── Festivos → set de días
+    const festivoSet = new Set();
+    st.festivos.forEach(f => {
+      let a = this.parse(f.start), b = this.parse(f.end || f.start);
+      if (isNaN(a) || isNaN(b)) return;
+      let g = 0;
+      while (a <= b && g++ < 120) { festivoSet.add(this.iso(a)); a = new Date(a.getTime() + MS); }
+    });
+    const eventoMap = new Map();
+    st.eventos.forEach(ev => { if (ev.date) eventoMap.set(ev.date, ev.label || 'Actividad'); });
+    const descontar = st.gestion === 'descontar';
+
+    // ── Días lectivos
+    const days = [];
+    let d = this.parse(st.inicio); const endD = this.parse(st.fin); let g = 0;
+    if (!isNaN(d) && !isNaN(endD)) {
+      while (d <= endD && g++ < 430) {
+        const dow = d.getDay(); const key = this.iso(d);
+        if (dow >= 1 && dow <= 5 && !festivoSet.has(key)) {
+          days.push({ key, n: Number(st.sesionesDia[dow]) || 0, ev: eventoMap.get(key) });
+        }
+        d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+      }
+    }
+    const trimOf = k => k <= st.t1Fin ? 0 : (k <= st.t2Fin ? 1 : 2);
+    const trims = [0, 1, 2].map(() => ({ dias: 0, teoricas: 0, perdidas: 0, asignadas: 0 }));
+    let teoricas = 0, evSesiones = 0;
+    const timeline = [];
+    days.forEach(day => {
+      const t = trims[trimOf(day.key)];
+      t.dias++; teoricas += day.n; t.teoricas += day.n;
+      if (day.ev) evSesiones += day.n;
+      if (day.ev && descontar) { t.perdidas += day.n; }
+      else { for (let i = 0; i < day.n; i++) timeline.push(day.key); }
+    });
+    const disponibles = timeline.length;
+    const perdidas = descontar ? evSesiones : 0;
+
+    // ── SdA
+    const TN = va ? ['1r trimestre', '2n trimestre', '3r trimestre'] : ['1r trimestre', '2º trimestre', '3r trimestre'];
+    const TS = ['T1', 'T2', 'T3'];
+    const SDA_COLORS = ['#BBD3F0', '#C6E3D4', '#F3D9B8', '#E6C9E0', '#CFE4B4', '#F2C6C0', '#BFE0E4', '#DED3B6', '#E9CBA0', '#CFCFEE', '#B8D8CE', '#EBCFDE'];
+    const SDA_INK = '#33302A';
+    const dayColor = {};           // day key -> SdA bg color (para el calendario)
+    const daySda = {};             // day key -> etiqueta de SdA
+    let cur = 0, anyLong = false, anyShort = false, overflow = false;
+    const total = st.sdas.length;
+    const move = (id, dir) => () => this.setState(t => {
+      const arr = t.sdas.slice();
+      const idx = arr.findIndex(x => x.id === id);
+      const j = idx + dir;
+      if (idx < 0 || j < 0 || j >= arr.length) return {};
+      const tmp = arr[idx]; arr[idx] = arr[j]; arr[j] = tmp;
+      return { sdas: arr };
+    });
+    const sdasView = st.sdas.map((s, i) => {
+      const n = Math.max(0, Number(s.sesiones) || 0);
+      const color = SDA_COLORS[i % SDA_COLORS.length];
+      const a = cur, b = cur + n - 1; cur += n;
+      let rango = '—', trimLabel = '', over = false;
+      if (n > 0 && a < timeline.length) {
+        const bi = Math.min(b, timeline.length - 1);
+        const k1 = timeline[a], k2 = timeline[bi];
+        rango = this.fmt(k1) + ' – ' + this.fmt(k2);
+        const ta = trimOf(k1), tb = trimOf(k2);
+        trimLabel = ta === tb ? TS[ta] : TS[ta] + '–' + TS[tb];
+        for (let j = a; j <= bi; j++) { trims[trimOf(timeline[j])].asignadas++; if (dayColor[timeline[j]] === undefined) { dayColor[timeline[j]] = color; daySda[timeline[j]] = 'SdA ' + (i + 1) + '. ' + (s.titulo || ''); } }
+        if (b >= timeline.length) { over = true; overflow = true; }
+      } else if (n > 0) { over = true; overflow = true; rango = va ? 'sense sessions' : 'sin sesiones'; trimLabel = '—'; }
+      const isLong = n > 20, isShort = n > 0 && n < 4;
+      if (isLong) anyLong = true; if (isShort) anyShort = true;
+      return {
+        id: s.id, n: i + 1, titulo: s.titulo, sesiones: n, color, rango, trimLabel,
+        onTitulo: this.upd('sdas', s.id, 'titulo'),
+        inc: () => this.setState(t => ({ sdas: t.sdas.map(x => x.id === s.id ? { ...x, sesiones: (Number(x.sesiones) || 0) + 1 } : x) })),
+        dec: () => this.setState(t => ({ sdas: t.sdas.map(x => x.id === s.id ? { ...x, sesiones: Math.max(0, (Number(x.sesiones) || 0) - 1) } : x) })),
+        remove: this.del('sdas', s.id),
+        moveUp: move(s.id, -1), moveDown: move(s.id, 1),
+        canUp: i > 0, canDown: i < total - 1,
+        upSt: 'width:22px;height:20px;border-radius:6px;border:1px solid #E5E0D3;font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;' + (i > 0 ? 'background:#FFFFFF;color:#6B6355;cursor:pointer' : 'background:#F4F2EC;color:#D8D2C2;cursor:default'),
+        downSt: 'width:22px;height:20px;border-radius:6px;border:1px solid #E5E0D3;font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;' + (i < total - 1 ? 'background:#FFFFFF;color:#6B6355;cursor:pointer' : 'background:#F4F2EC;color:#D8D2C2;cursor:default'),
+        chipSt: over ? 'background:#F7E7E4;color:#8F2F23' : 'background:#F1EEE5;color:#6B6355',
+        hasWarn: isLong || isShort || over,
+        warn: over ? (va ? 'No hi cap en el calendari disponible' : 'No cabe en el calendario disponible') : (isLong ? (va ? 'SA molt llarga (més de 20 sessions): valora dividir-la' : 'SdA muy larga (más de 20 sesiones): valora dividirla') : (va ? 'SA molt curta (menys de 4 sessions): valora fusionar-la' : 'SdA muy corta (menos de 4 sesiones): valora fusionarla'))
+      };
+    });
+    const totalSdA = cur;
+    const reserva = disponibles - totalSdA;
+
+    // ── Alertas
+    const alerts = [];
+    const base = 'border-radius:11px;padding:11px 14px;font-size:13px;font-weight:500;line-height:1.5;';
+    const stErr = base + 'background:#F7E7E4;color:#8F2F23;border:1px solid #EACFC9';
+    const stWarn = base + 'background:#F6EEDC;color:#7A5414;border:1px solid #E9DBBB';
+    const stInfo = base + 'background:#E9F0EB;color:#2F5B4A;border:1px solid #D0DFD5';
+    if (disponibles === 0) alerts.push({ st: stErr, text: va ? 'No hi ha sessions disponibles: revisa les dates d\'inici i fi i l\'horari setmanal.' : 'No hay sesiones disponibles: revisa las fechas de inicio y fin y el horario semanal.' });
+    if (reserva < 0) alerts.push({ st: stErr, text: va ? ('Excés de sessions: les SA sumen ' + totalSdA + ' però només hi ha ' + disponibles + ' disponibles (' + (-reserva) + ' de més). Redueix sessions o replanteja alguna SA.') : ('Exceso de sesiones: las SdA suman ' + totalSdA + ' pero solo hay ' + disponibles + ' disponibles (' + (-reserva) + ' de más). Reduce sesiones o replantea alguna SdA.') });
+    else if (disponibles > 0 && reserva > disponibles * umbral / 100) alerts.push({ st: stWarn, text: va ? ('Dèficit de planificació: queden ' + reserva + ' sessions sense assignar (més del ' + umbral + '% del total). Amplia alguna SA o afig sessions de repàs i avaluació.') : ('Déficit de planificación: quedan ' + reserva + ' sesiones sin asignar (más del ' + umbral + '% del total). Amplía alguna SdA o añade sesiones de repaso y evaluación.') });
+    else if (reserva > 0) alerts.push({ st: stInfo, text: va ? (reserva + ' sessions en reserva per a imprevistos: un marge raonable i defensable.') : (reserva + ' sesiones en reserva para imprevistos: un margen razonable y defendible.') });
+    if (anyLong) alerts.push({ st: stWarn, text: va ? 'Hi ha SA de més de 20 sessions: són difícils de sostindre; valora dividir-les.' : 'Hay SdA de más de 20 sesiones: son difíciles de sostener; valora dividirlas.' });
+    if (anyShort) alerts.push({ st: stWarn, text: va ? 'Hi ha SA de menys de 4 sessions: valora fusionar-les amb altres.' : 'Hay SdA de menos de 4 sesiones: valora fusionarlas con otras.' });
+    const dispT = trims.map(t => t.teoricas - t.perdidas);
+    const mx = Math.max(...dispT), mn = Math.min(...dispT);
+    if (mn > 0 && mx / mn > 1.6) alerts.push({ st: stWarn, text: va ? ('Trimestres desequilibrats: el més llarg té ' + mx + ' sessions i el més curt ' + mn + '. Revisa els talls de trimestre o compensa la càrrega de SA.') : ('Trimestres desequilibrados: el más largo tiene ' + mx + ' sesiones y el más corto ' + mn + '. Revisa los cortes de trimestre o compensa la carga de SdA.') });
+
+    // ── Trimestres (vista)
+    const addDay = s => { const x = this.parse(s); return this.iso(new Date(x.getFullYear(), x.getMonth(), x.getDate() + 1)); };
+    const tRangos = [
+      this.fmt(st.inicio) + ' – ' + this.fmt(st.t1Fin),
+      this.fmt(addDay(st.t1Fin)) + ' – ' + this.fmt(st.t2Fin),
+      this.fmt(addDay(st.t2Fin)) + ' – ' + this.fmt(st.fin)
+    ];
+    const tColors = ['#4A6C87', '#3E7862', '#4C6B9E'];
+    const trimsView = trims.map((t, i) => {
+      const disp = t.teoricas - t.perdidas;
+      return {
+        nombre: TN[i], rango: tRangos[i], dias: t.dias, disponibles: disp,
+        asignadas: t.asignadas, color: tColors[i],
+        diasLabel: tx.sesLectDias(t.dias), asignadasLabel: tx.asignadasSda(t.asignadas),
+        pct: disp > 0 ? Math.min(100, Math.round(t.asignadas / disp * 100)) : 0
+      };
+    });
+
+    // ── Segmentados
+    const segBase = 'flex:1;padding:8px 10px;border-radius:9px;font-size:13px;font-weight:600;';
+    const seg = (cur2, val, label, on) => ({
+      label, on,
+      st: segBase + (cur2 === val ? 'background:#29251F;color:#F6F4EE;border:1px solid #29251F' : 'background:#FCFBF7;color:#6B6355;border:1px solid #E5E0D3')
+    });
+    const etapaOpts = [
+      seg(st.etapa, 'infantil', tx.infantil, this.setEtapa('infantil')),
+      seg(st.etapa, 'primaria', tx.primaria, this.setEtapa('primaria'))
+    ];
+    const areaOpts = [...this.areasFor(st.etapa, st.idioma), tx.otraEsp];
+    const areaEsOtra = st.area === T.es.otraEsp || st.area === T.va.otraEsp;
+    const areaEfectiva = areaEsOtra ? (st.areaCustom.trim() || (va ? 'Àrea a especificar' : 'Área a especificar')) : st.area;
+    const gestionOpts = [
+      seg(st.gestion, 'descontar', tx.descontarSes, () => this.setState({ gestion: 'descontar' })),
+      seg(st.gestion, 'integrar', tx.integrarSda, () => this.setState({ gestion: 'integrar' }))
+    ];
+    // Selector de idioma
+    const segLang = (val, label) => ({
+      label, on: () => { try { localStorage.setItem('planiacv_idioma', val); } catch (e) {} this.setState({ idioma: val }); },
+      st: 'padding:5px 11px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:0.04em;' + (st.idioma === val ? 'background:#29251F;color:#F6F4EE;border:1px solid #29251F' : 'background:#FCFBF7;color:#6B6355;border:1px solid #E5E0D3')
+    });
+    const idiomaOpts = [segLang('es', 'ES'), segLang('va', 'VA')];
+
+    // ── Horario semanal
+    const DL = tx.dias;
+    const weekdays = DL.map((l, i) => {
+      const dow = i + 1;
+      return {
+        label: l, count: Number(st.sesionesDia[dow]) || 0,
+        inc: () => this.setState(t => ({ sesionesDia: { ...t.sesionesDia, [dow]: Math.min(6, (Number(t.sesionesDia[dow]) || 0) + 1) } })),
+        dec: () => this.setState(t => ({ sesionesDia: { ...t.sesionesDia, [dow]: Math.max(0, (Number(t.sesionesDia[dow]) || 0) - 1) } }))
+      };
+    });
+    const semanal = weekdays.reduce((a, w) => a + w.count, 0);
+
+    // ── Listas editables
+    const festivosView = st.festivos.map(f => ({
+      ...f,
+      onLabel: this.upd('festivos', f.id, 'label'),
+      onStart: this.upd('festivos', f.id, 'start'),
+      onEnd: this.upd('festivos', f.id, 'end'),
+      remove: this.del('festivos', f.id)
+    }));
+    const eventosView = st.eventos.map(ev => ({
+      ...ev,
+      onDate: this.upd('eventos', ev.id, 'date'),
+      onLabel: this.upd('eventos', ev.id, 'label'),
+      remove: this.del('eventos', ev.id)
+    }));
+
+    // ── Calendario anual  (festivos = rojo · actividades = verde · SdA = color propio)
+    const FEST_BG = '#D64B3F', FEST_FG = '#FFFFFF';
+    const EV_BG = '#2E8B57', EV_FG = '#FFFFFF';
+    const MESES_L = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const MESES_VA = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+    const MESES = va ? MESES_VA : MESES_L;
+    const months = [];
+    // clasifica un día -> {bg, fg, kind}
+    const classify = (key, dow) => {
+      if (key < st.inicio || key > st.fin) return { bg: '', fg: '#DED9CB', kind: 'off' };
+      if (eventoMap.has(key) && dow >= 1 && dow <= 5 && !festivoSet.has(key)) return { bg: EV_BG, fg: EV_FG, kind: 'ev' };
+      if (dow === 0 || dow === 6) return { bg: '', fg: '#C9C2B2', kind: 'wknd' };
+      if (festivoSet.has(key)) return { bg: FEST_BG, fg: FEST_FG, kind: 'fest' };
+      const c = dayColor[key];
+      if (c) return { bg: c, fg: SDA_INK, kind: 'sda' };
+      return { bg: '#FFFFFF', fg: '#4A443A', kind: 'lect' };
+    };
+    if (!isNaN(this.parse(st.inicio)) && !isNaN(this.parse(st.fin))) {
+      const cellBase = 'height:20px;display:flex;align-items:center;justify-content:center;border-radius:5px;font-size:10px;font-variant-numeric:tabular-nums;';
+      const stHead = cellBase + 'color:#B3AB9C;font-weight:700';
+      const s0 = this.parse(st.inicio), e0 = this.parse(st.fin);
+      let m = new Date(s0.getFullYear(), s0.getMonth(), 1);
+      const endM = new Date(e0.getFullYear(), e0.getMonth(), 1);
+      let gm = 0;
+      while (m <= endM && gm++ < 14) {
+        const cells = [...DL, 'S', 'D'].map(h => ({ d: h, st: stHead, bg: '', fg: '#B3AB9C', head: true }));
+        const offset = (m.getDay() + 6) % 7;
+        for (let i = 0; i < offset; i++) cells.push({ d: '', st: cellBase, bg: '', fg: '' });
+        const last = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+        for (let dd = 1; dd <= last; dd++) {
+          const dt = new Date(m.getFullYear(), m.getMonth(), dd);
+          const key = this.iso(dt); const dow = dt.getDay();
+          const c = classify(key, dow);
+          let cst = cellBase + (c.bg ? 'background:' + c.bg + ';' : '') + 'color:' + c.fg + ';';
+          if (c.kind === 'lect') cst += 'border:1px solid #ECE7DB;';
+          if (c.kind === 'fest' || c.kind === 'ev' || c.kind === 'sda') cst += 'font-weight:600;';
+          cells.push({ d: String(dd), st: cst, bg: c.bg, fg: c.fg });
+        }
+        months.push({ label: MESES[m.getMonth()] + ' ' + m.getFullYear(), cells });
+        m = new Date(m.getFullYear(), m.getMonth() + 1, 1);
+      }
+    }
+    // Leyenda de colores de SdA para el calendario
+    const calLegend = sdasView.filter(s => s.sesiones > 0).map(s => ({
+      color: s.color,
+      label: 'SdA ' + s.n + ': ' + (s.titulo || '—') + ' · ' + s.rango,
+      st: 'display:flex;align-items:center;gap:6px;font-size:11px;color:#6B6355'
+    }));
+
+    // ── Texto programación
+    const L = [];
+    L.push((va ? 'TEMPORALITZACIÓ ANUAL — ' : 'TEMPORALIZACIÓN ANUAL — ') + areaEfectiva + ' · ' + st.nivel);
+    L.push((va ? 'Curs ' : 'Curso ') + st.cursoEscolar + ' · Comunitat Valenciana' + (st.localidad ? ' · ' + st.localidad : ''));
+    L.push('');
+    L.push((va ? 'Horari: ' : 'Horario: ') + semanal + (va ? ' sessions setmanals de ' : ' sesiones semanales de ') + st.duracion + (va ? ' minuts.' : ' minutos.'));
+    L.push((va ? 'Dies lectius: ' : 'Días lectivos: ') + days.length + (va ? '. Sessions teòriques: ' : '. Sesiones teóricas: ') + teoricas + '. ' + (descontar ? (va ? ('Sessions descomptades per activitats de centre: ' + perdidas + '.') : ('Sesiones descontadas por actividades de centro: ' + perdidas + '.')) : (va ? 'Les activitats de centre s\'integren en les SA corresponents.' : 'Las actividades de centro se integran en las SdA correspondientes.')) + (va ? ' Sessions disponibles: ' : ' Sesiones disponibles: ') + disponibles + '.');
+    L.push('');
+    trimsView.forEach(t => L.push(t.nombre + ' (' + t.rango + '): ' + t.disponibles + (va ? ' sessions lectives.' : ' sesiones lectivas.')));
+    L.push('');
+    L.push(va ? 'DISTRIBUCIÓ DE SITUACIONS D\'APRENENTATGE' : 'DISTRIBUCIÓN DE SITUACIONES DE APRENDIZAJE');
+    sdasView.forEach(s => L.push((va ? 'SA ' : 'SdA ') + s.n + '. ' + s.titulo + ' — ' + s.sesiones + (va ? ' sessions (' : ' sesiones (') + s.rango + ', ' + s.trimLabel + ')'));
+    L.push('');
+    L.push(va ? ('Observacions: es reserven ' + Math.max(0, reserva) + ' sessions per a repàs, avaluació i imprevistos. Temporalització subjecta al calendari escolar oficial (DOGV) i a la concreció organitzativa del centre.') : ('Observaciones: se reservan ' + Math.max(0, reserva) + ' sesiones para repaso, evaluación e imprevistos. Temporalización sujeta al calendario escolar oficial (DOGV) y a la concreción organizativa del centro.'));
+    const textoProg = L.join('\n');
+
+    // ── Normativa utilizada
+    const nrm = st.normativa || {};
+    const chipOn = 'font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;background:#E9F0EB;color:#2F5B4A;border:1px solid #D0DFD5';
+    const chipOff = 'font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;background:#F4F2EC;color:#B3AB9C;border:1px solid #EAE5D9';
+    const chipCentro = 'font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;background:#E6EEF3;color:#33546A;border:1px solid #CBDCE6';
+    const normativaView = [
+      { key: 'd106', label: 'Decreto 106/2022' },
+      { key: 'd96', label: 'Decreto 96/2026' },
+      { key: 'cal', label: 'Calendario Escolar 2026-2027' }
+    ].map(x => ({ label: x.label, mark: nrm[x.key] ? '✓' : '—', st: nrm[x.key] ? chipOn : chipOff }));
+    // Documentos del centro (con nombre) → se citan como fuente propia
+    const centroDocs = (st.centro || []).filter(d => d && d.name && d.name.trim()).map(d => d.name.trim());
+    centroDocs.forEach(name => normativaView.push({ label: name, mark: '✓', st: chipCentro }));
+    const normativaCitada = normativaView.filter(x => x.mark === '✓').map(x => x.label);
+
+    const autoria = tx.creadoPor + ' · ' + tx.proyecto;
+    const tituloDoc = areaEfectiva + ' · ' + st.nivel + ' · ' + (va ? 'Curs ' : 'Curso ') + st.cursoEscolar;
+    const obsTexto = va
+      ? ('Es reserven ' + Math.max(0, reserva) + ' sessions per a repàs, avaluació i imprevistos. ' + (descontar ? ('Les activitats de centre (' + perdidas + ' sessions) es descompten del còmput. ') : 'Les activitats de centre s\'integren en les SA corresponents. ') + 'Temporalització subjecta al calendari escolar oficial (DOGV) i a la concreció organitzativa del centre.')
+      : ('Se reservan ' + Math.max(0, reserva) + ' sesiones para repaso, evaluación e imprevistos. ' + (descontar ? ('Las actividades de centro (' + perdidas + ' sesiones) se descuentan del cómputo. ') : 'Las actividades de centro se integran en las SdA correspondientes. ') + 'Temporalización sujeta al calendario escolar oficial (DOGV) y a la concreción organizativa del centro.');
+    const fechaGen = new Date().toLocaleDateString(va ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // ── Exportar Word (.doc HTML)
+    const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const onWord = () => {
+      const W = va ? {
+        tituloDocum: 'Temporalització Anual', marca: 'PlanIA CV · Projecte Sentia', generadoEl: 'Generat el',
+        resumen: 'Resum', distTrim: 'Distribució trimestral', thTrim: ['Trimestre', 'Període', 'Dies', 'Disponibles', 'Assignades'],
+        tempSda: 'Temporalització — Situacions d\'Aprenentatge', thSda: ['', 'Nº', 'Situació d\'aprenentatge', 'Sessions', 'Període', 'Trim.'],
+        rHorario: 'Horari:', rSesSem: 'sessions setmanals de', rMin: 'minuts.', rDias: 'Dies lectius:', rTeor: 'Sessions teòriques:', rDesc: 'Descomptades per activitats:', rDisp: 'Sessions disponibles:', rAsig: 'Assignades a SA:', rReserva: 'Reserva:',
+        calTitulo: 'Calendari anual per SA', calSub: 'Cada situació d\'aprenentatge té el seu color. Els festius apareixen en roig i les activitats de centre en verd.',
+        festivo: 'Festiu', actividad: 'Activitat de centre', thCal: ['Color', 'Situació d\'aprenentatge', 'Període'],
+        observaciones: 'Observacions', normDocs: 'Normativa i documents citats', sinDocs: 'Sense documents ni normativa carregats',
+        pie: 'Document generat amb PlanIA CV.', pie2: 'La ferramenta no substitueix la normativa oficial ni el criteri professional docent.'
+      } : {
+        tituloDocum: 'Temporalización Anual', marca: 'PlanIA CV · Proyecto Sentia', generadoEl: 'Generado el',
+        resumen: 'Resumen', distTrim: 'Distribución trimestral', thTrim: ['Trimestre', 'Periodo', 'Días', 'Disponibles', 'Asignadas'],
+        tempSda: 'Temporalización — Situaciones de Aprendizaje', thSda: ['', 'Nº', 'Situación de aprendizaje', 'Sesiones', 'Periodo', 'Trim.'],
+        rHorario: 'Horario:', rSesSem: 'sesiones semanales de', rMin: 'minutos.', rDias: 'Días lectivos:', rTeor: 'Sesiones teóricas:', rDesc: 'Descontadas por actividades:', rDisp: 'Sesiones disponibles:', rAsig: 'Asignadas a SdA:', rReserva: 'Reserva:',
+        calTitulo: 'Calendario anual por SdA', calSub: 'Cada situación de aprendizaje tiene su color. Los festivos aparecen en rojo y las actividades de centro en verde.',
+        festivo: 'Festivo', actividad: 'Actividad de centro', thCal: ['Color', 'Situación de aprendizaje', 'Periodo'],
+        observaciones: 'Observaciones', normDocs: 'Normativa y documentos citados', sinDocs: 'Sin documentos ni normativa cargados',
+        pie: 'Documento generado con PlanIA CV.', pie2: 'La herramienta no sustituye la normativa oficial ni el criterio profesional docente.'
+      };
+      const zebra = (rows, cols) => rows.map((r, i) => '<tr style="background:' + (i % 2 ? '#FCFBF7' : '#FFFFFF') + '">' + r + '</tr>').join('');
+      const rowsTrim = trimsView.map(t => '<td>' + esc(t.nombre) + '</td><td>' + esc(t.rango) + '</td><td style="text-align:center">' + t.dias + '</td><td style="text-align:center">' + t.disponibles + '</td><td style="text-align:center">' + t.asignadas + '</td>');
+      const rowsSda = sdasView.map(s => '<td style="text-align:center"><span style="display:inline-block;width:9pt;height:9pt;background:' + s.color + '"></span></td><td style="text-align:center">' + s.n + '</td><td>' + esc(s.titulo) + '</td><td style="text-align:center">' + s.sesiones + '</td><td>' + esc(s.rango) + '</td><td style="text-align:center">' + esc(s.trimLabel) + '</td>');
+      // Calendario coloreado por SdA (festivo rojo · actividad verde)
+      const monthTable = m => {
+        let body = '';
+        for (let i = 0; i < m.cells.length; i += 7) {
+          let tr = '';
+          for (let j = i; j < i + 7 && j < m.cells.length; j++) {
+            const c = m.cells[j];
+            if (c.head) tr += '<td style="border:none;text-align:center;color:#4A6C87;background:#E6EEF3;font-weight:bold;width:24pt;height:14pt;font-size:7pt">' + c.d + '</td>';
+            else if (!c.d) tr += '<td style="border:none"></td>';
+            else tr += '<td style="border:0.5pt solid #ddd;text-align:center;width:24pt;height:14pt;background:' + (c.bg || '#ffffff') + ';color:' + (c.fg || '#333') + '">' + c.d + '</td>';
+          }
+          body += '<tr>' + tr + '</tr>';
+        }
+        return '<td style="border:none;vertical-align:top;padding:0 10pt 12pt 0"><p style="font-weight:bold;margin:0 0 3pt;text-transform:capitalize;font-size:9pt">' + esc(m.label) + '</p><table style="border-collapse:collapse;font-size:8pt">' + body + '</table></td>';
+      };
+      let calRows = '';
+      for (let i = 0; i < months.length; i += 3) {
+        calRows += '<tr>' + months.slice(i, i + 3).map(monthTable).join('') + '</tr>';
+      }
+      const legendRows = sdasView.filter(s => s.sesiones > 0).map(s => '<td style="text-align:center;background:' + s.color + '">&nbsp;</td><td>SdA ' + s.n + '. ' + esc(s.titulo) + '</td><td>' + esc(s.rango) + '</td>');
+      const th = arr => arr.map(x => '<th>' + esc(x) + '</th>').join('');
+      const calHtml = months.length
+        ? '<h2>' + esc(W.calTitulo) + '</h2>' +
+          '<p class="sub">' + esc(W.calSub) + '</p>' +
+          '<table class="plain" style="border:none;width:auto">' + calRows + '</table>' +
+          '<p style="font-size:9pt;margin-top:8pt"><span style="display:inline-block;width:10pt;height:10pt;background:#D64B3F"></span> ' + esc(W.festivo) + ' &nbsp;&nbsp; <span style="display:inline-block;width:10pt;height:10pt;background:#2E8B57"></span> ' + esc(W.actividad) + '</p>' +
+          '<table class="data" style="margin-top:6pt"><tr>' + th(W.thCal) + '</tr>' + zebra(legendRows) + '</table>'
+        : '';
+      // Chips de normativa / documentos citados
+      const chip = (txt, gris) => '<span style="display:inline-block;padding:3pt 9pt;margin:0 4pt 4pt 0;border-radius:20pt;font-size:9pt;' + (gris ? 'background:#EEEBE3;color:#888;border:0.75pt solid #DED9CB' : 'background:#E9F0EB;color:#2F5B4A;border:0.75pt solid #D0DFD5') + '">' + esc(txt) + '</span>';
+      const chipsHtml = '<h2>' + esc(W.normDocs) + '</h2><p style="margin:0">' + (normativaCitada.length ? normativaCitada.map(n => chip(n, false)).join('') : chip(W.sinDocs, true)) + '</p>';
+      // Portada de marca
+      const cover =
+        '<div class="cover">' +
+        '<table class="plain" style="width:auto;margin:0 auto 14pt"><tr><td style="border:none;background:#4A6C87;color:#F6F4EE;width:54pt;height:54pt;text-align:center;font-size:34pt;font-weight:bold;font-family:Georgia,serif;border-radius:12pt">P</td></tr></table>' +
+        '<p style="color:#4A6C87;font-size:10pt;letter-spacing:1pt;text-transform:uppercase;margin:0 0 10pt;font-weight:bold">' + esc(W.marca) + '</p>' +
+        '<h1 style="font-size:26pt;margin:0 0 10pt">' + esc(W.tituloDocum) + '</h1>' +
+        '<p style="font-size:14pt;margin:0 0 4pt">' + esc(tituloDoc) + '</p>' +
+        '<p class="sub" style="margin:0 0 2pt">Comunitat Valenciana' + (st.localidad ? ' · ' + esc(st.localidad) : '') + '</p>' +
+        '<p class="sub" style="margin:2pt 0 0">' + esc(W.generadoEl) + ' ' + esc(fechaGen) + '</p>' +
+        '</div>';
+      const html =
+        '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>' +
+        'body{font-family:Calibri,Arial,sans-serif;color:#222;font-size:11pt} h1{font-size:20pt;color:#4A6C87;margin:0 0 4pt} h2{font-size:13pt;color:#29251F;border-left:4pt solid #4A6C87;padding:2pt 0 2pt 8pt;margin:18pt 0 6pt} .sub{color:#666;font-size:10pt} table{border-collapse:collapse;width:100%;font-size:10pt} th,td{border:1px solid #bbb;padding:5pt 7pt} th{background:#4A6C87;color:#FFFFFF;text-align:left} table.plain td{border:none} .cover{text-align:center;margin:40pt 0 60pt} .foot{color:#888;font-size:9pt;margin-top:24pt;border-top:1px solid #ccc;padding-top:6pt}' +
+        '</style></head><body>' +
+        cover +
+        '<h2>' + esc(W.resumen) + '</h2><p>' + esc(W.rHorario) + ' <b>' + semanal + '</b> ' + esc(W.rSesSem) + ' ' + st.duracion + ' ' + esc(W.rMin) + ' ' + esc(W.rDias) + ' <b>' + days.length + '</b>. ' + esc(W.rTeor) + ' <b>' + teoricas + '</b>. ' + (descontar ? esc(W.rDesc) + ' <b>' + perdidas + '</b>. ' : '') + esc(W.rDisp) + ' <b>' + disponibles + '</b>. ' + esc(W.rAsig) + ' <b>' + totalSdA + '</b>. ' + esc(W.rReserva) + ' <b>' + Math.max(0, reserva) + '</b>.</p>' +
+        '<h2>' + esc(W.distTrim) + '</h2><table class="data"><tr>' + th(W.thTrim) + '</tr>' + zebra(rowsTrim) + '</table>' +
+        '<h2>' + esc(W.tempSda) + '</h2><table class="data"><tr>' + th(W.thSda) + '</tr>' + zebra(rowsSda) + '</table>' +
+        calHtml +
+        '<h2>' + esc(W.observaciones) + '</h2><p>' + esc(obsTexto) + '</p>' +
+        chipsHtml +
+        '<p class="foot">' + esc(W.pie) + ' ' + esc(autoria) + '. ' + esc(W.pie2) + '</p>' +
+        '</body></html>';
+      this._download(new Blob(['\ufeff' + html], { type: 'application/msword' }), 'Temporalizacion_' + areaEfectiva.replace(/\s+/g, '_') + '.doc');
+      this.setState({ exportStatus: 'Word generado: ' + areaEfectiva + ' · ' + st.nivel + '. Autoría incluida.' });
+    };
+
+    // ── Exportar Excel (XLSX)
+    const onExcel = () => {
+      if (typeof XLSX === 'undefined') { this.setState({ exportStatus: 'La librería de exportación aún se está cargando; inténtalo de nuevo en un momento.' }); return; }
+      const E = {
+        es: {
+          hojaResumen: 'Resumen', hojaCalendario: 'Calendario', hojaTemp: 'Temporalización',
+          hojaDistrib: 'Distribución trimestral', hojaObs: 'Observaciones',
+          tituloResumen: 'PlanIA CV — Resumen', generado: 'Generado el ',
+          sesSemanales: 'Sesiones semanales', duracionMin: 'Duración (min)', diasLectivos: 'Días lectivos',
+          sesTeoricas: 'Sesiones teóricas', sesDescontadas: 'Sesiones descontadas', sesIntegradas: 'Sesiones integradas',
+          sesDisponibles: 'Sesiones disponibles', asignadasSda: 'Asignadas a SdA', reserva: 'Reserva', autoria: 'Autoría',
+          colFecha: 'Fecha', colDia: 'Día', colSesiones: 'Sesiones', colEstado: 'Estado', colSda: 'Situación de aprendizaje',
+          lectivo: 'Lectivo', actividadPrefix: 'Actividad: ',
+          colNum: 'Nº', colPeriodo: 'Periodo', colTrimestre: 'Trimestre',
+          colTrimNombre: 'Trimestre', colDiasLect: 'Días lectivos', colDisponibles: 'Disponibles', colAsignadas: 'Asignadas',
+          observaciones: 'Observaciones', normativaConsultada: 'Normativa y documentos consultados',
+          sinDocumentos: 'Sin documentos cargados en la Base documental'
+        },
+        va: {
+          hojaResumen: 'Resum', hojaCalendario: 'Calendari', hojaTemp: 'Temporalització',
+          hojaDistrib: 'Distribució trimestral', hojaObs: 'Observacions',
+          tituloResumen: 'PlanIA CV — Resum', generado: 'Generat el ',
+          sesSemanales: 'Sessions setmanals', duracionMin: 'Duració (min)', diasLectivos: 'Dies lectius',
+          sesTeoricas: 'Sessions teòriques', sesDescontadas: 'Sessions descomptades', sesIntegradas: 'Sessions integrades',
+          sesDisponibles: 'Sessions disponibles', asignadasSda: 'Assignades a SA', reserva: 'Reserva', autoria: 'Autoria',
+          colFecha: 'Data', colDia: 'Dia', colSesiones: 'Sessions', colEstado: 'Estat', colSda: 'Situació d\'aprenentatge',
+          lectivo: 'Lectiu', actividadPrefix: 'Activitat: ',
+          colNum: 'Núm.', colPeriodo: 'Període', colTrimestre: 'Trimestre',
+          colTrimNombre: 'Trimestre', colDiasLect: 'Dies lectius', colDisponibles: 'Disponibles', colAsignadas: 'Assignades',
+          observaciones: 'Observacions', normativaConsultada: 'Normativa i documents consultats',
+          sinDocumentos: 'Sense documents carregats en la Base documental'
+        }
+      };
+      const e = E[st.idioma];
+      const wb = XLSX.utils.book_new();
+      const s1 = XLSX.utils.aoa_to_sheet([
+        [e.tituloResumen], [tituloDoc], ['Comunitat Valenciana' + (st.localidad ? ' · ' + st.localidad : '')], [e.generado + fechaGen], [''],
+        [e.sesSemanales, semanal], [e.duracionMin, st.duracion], [e.diasLectivos, days.length],
+        [e.sesTeoricas, teoricas], [descontar ? e.sesDescontadas : e.sesIntegradas, evSesiones],
+        [e.sesDisponibles, disponibles], [e.asignadasSda, totalSdA], [e.reserva, Math.max(0, reserva)],
+        ['', ''], [e.autoria, autoria]
+      ]);
+      s1['!cols'] = [{ wch: 26 }, { wch: 44 }];
+      // Combinar (merge) las 4 líneas de cabecera a lo ancho (columnas A–B)
+      s1['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } },
+        { s: { r: 3, c: 0 }, e: { r: 3, c: 1 } },
+        { s: { r: 14, c: 1 }, e: { r: 14, c: 1 } }
+      ];
+      XLSX.utils.book_append_sheet(wb, s1, e.hojaResumen);
+
+      const DOW = va ? ['Dg','Dl','Dt','Dc','Dj','Dv','Ds'] : ['dom','lun','mar','mié','jue','vie','sáb'];
+      const calAoa = [[e.colFecha, e.colDia, e.colSesiones, e.colEstado, e.colSda]];
+      days.forEach(day => { const dt = this.parse(day.key); calAoa.push([day.key, DOW[dt.getDay()], day.n, day.ev ? e.actividadPrefix + day.ev : e.lectivo, daySda[day.key] || '']); });
+      const s2 = XLSX.utils.aoa_to_sheet(calAoa); s2['!cols'] = [{ wch: 12 }, { wch: 6 }, { wch: 9 }, { wch: 22 }, { wch: 38 }];
+      s2['!autofilter'] = { ref: 'A1:E' + calAoa.length };
+      XLSX.utils.book_append_sheet(wb, s2, e.hojaCalendario);
+
+      const tempAoa = [[e.colNum, e.colSda, e.colSesiones, e.colPeriodo, e.colTrimestre]];
+      sdasView.forEach(s => tempAoa.push([s.n, s.titulo, s.sesiones, s.rango, s.trimLabel]));
+      const s3 = XLSX.utils.aoa_to_sheet(tempAoa); s3['!cols'] = [{ wch: 5 }, { wch: 40 }, { wch: 10 }, { wch: 20 }, { wch: 10 }];
+      s3['!autofilter'] = { ref: 'A1:E' + tempAoa.length };
+      XLSX.utils.book_append_sheet(wb, s3, e.hojaTemp);
+
+      const trimAoa = [[e.colTrimNombre, e.colPeriodo, e.colDiasLect, e.colDisponibles, e.colAsignadas]];
+      trimsView.forEach(t => trimAoa.push([t.nombre, t.rango, t.dias, t.disponibles, t.asignadas]));
+      const s4 = XLSX.utils.aoa_to_sheet(trimAoa); s4['!cols'] = [{ wch: 16 }, { wch: 22 }, { wch: 13 }, { wch: 12 }, { wch: 11 }];
+      XLSX.utils.book_append_sheet(wb, s4, e.hojaDistrib);
+
+      const obsRows = [[e.observaciones], [obsTexto], [''], [e.normativaConsultada]];
+      if (normativaCitada.length) normativaCitada.forEach(n => obsRows.push(['· ' + n]));
+      else obsRows.push(['· ' + e.sinDocumentos]);
+      obsRows.push(['']); obsRows.push([e.autoria, autoria]);
+      const s5 = XLSX.utils.aoa_to_sheet(obsRows); s5['!cols'] = [{ wch: 30 }, { wch: 60 }];
+      XLSX.utils.book_append_sheet(wb, s5, e.hojaObs);
+
+      XLSX.writeFile(wb, 'Temporalizacion_' + areaEfectiva.replace(/\s+/g, '_') + '.xlsx');
+      this.setState({ exportStatus: 'Excel generado con 5 hojas: Resumen, Calendario, Temporalización, Distribución trimestral y Observaciones.' });
+    };
+
+    const onTextoProg = () => {
+      try { navigator.clipboard.writeText(textoProg); } catch (e) {}
+      this.setState({ exportStatus: 'Texto para la Programación Anual generado y copiado al portapapeles. Disponible más abajo para revisión.' });
+    };
+
+    // ── Progreso
+    const progresoPct = disponibles > 0 ? Math.min(100, Math.round(totalSdA / disponibles * 100)) : 0;
+    const progresoColor = reserva < 0 ? '#8F2F23' : '#4A6C87';
+    const progresoTexto = reserva >= 0
+      ? (va ? (totalSdA + ' de ' + disponibles + ' sessions assignades · ' + reserva + ' en reserva') : (totalSdA + ' de ' + disponibles + ' sesiones asignadas · ' + reserva + ' en reserva'))
+      : (va ? (totalSdA + ' assignades sobre ' + disponibles + ' disponibles · ' + (-reserva) + ' d\'excés') : (totalSdA + ' asignadas sobre ' + disponibles + ' disponibles · ' + (-reserva) + ' de exceso'));
+
+    return {
+      // contexto
+      nivel: st.nivel, area: st.area, localidad: st.localidad, cursoEscolar: st.cursoEscolar,
+      onNivel: this.set('nivel'), onArea: this.set('area'), onLocalidad: this.set('localidad'), onCursoEscolar: this.set('cursoEscolar'),
+      areaOpts, areaEsOtra, areaCustom: st.areaCustom, onAreaCustom: this.set('areaCustom'),
+      areaLabel: tx.areaMateria,
+      etapaOpts, gestionOpts, idiomaOpts,
+      // i18n
+      t: tx, footer1: tx.footerDisclaimer.split('<br>')[0], footer2: tx.footerDisclaimer.split('<br>')[1] || '',
+      sdaCountLabel: tx.deAsignadas(totalSdA, disponibles),
+      // calendario
+      inicio: st.inicio, fin: st.fin, t1Fin: st.t1Fin, t2Fin: st.t2Fin,
+      onInicio: this.set('inicio'), onFin: this.set('fin'), onT1: this.set('t1Fin'), onT2: this.set('t2Fin'),
+      festivosView,
+      addFestivo: () => this.setState(s => ({ festivos: [...s.festivos, { id: this._uid(), label: tx.festivoLocalDef, start: s.inicio, end: s.inicio }] })),
+      eventosView,
+      addEvento: () => this.setState(s => ({ eventos: [...s.eventos, { id: this._uid(), date: s.inicio, label: tx.nuevaActividad }] })),
+      // horario
+      weekdays, semanal, duracion: String(st.duracion), onDuracion: this.set('duracion'),
+      // resumen
+      diasLectivos: days.length, teoricas, evSesiones, disponibles,
+      perdidasLabel: descontar ? tx.sesDescontadas : tx.sesIntegradas,
+      // alertas / trimestres
+      alerts, hasAlerts: alerts.length > 0, trimsView,
+      // sdas
+      sdasView, totalSdA,
+      addSda: () => this.setState(s => ({ sdas: [...s.sdas, { id: this._uid(), titulo: tx.nuevaSda, sesiones: 10 }] })),
+      progresoPct, progresoColor, progresoTexto,
+      // normativa + exportación
+      normativaView, onWord, onExcel, onTextoProg, exportStatus: st.exportStatus,
+      // calendario anual + texto
+      showCal, months, calLegend, showTexto, textoProg,
+      onCopy: () => {
+        try { navigator.clipboard.writeText(textoProg); } catch (e) {}
+        this.setState({ copied: true });
+        clearTimeout(this._t);
+        this._t = setTimeout(() => this.setState({ copied: false }), 1600);
+      },
+      copiarLabel: st.copied ? tx.copiado : tx.copiarTexto
+    };
+  }
+}
+</script>
+</body>
+</html>
