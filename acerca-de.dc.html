@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #F6F4EE; }
+  * { box-sizing: border-box; }
+  a { color: inherit; }
+</style>
+<script>
+  fetch('./estado.json').then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.activo === false) {
+      var o = document.createElement('div');
+      o.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#F6F4EE;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:24px;font-family:\'Public Sans\',sans-serif';
+      o.innerHTML = '<div style="width:64px;height:64px;border-radius:18px;background:#4A6C87;color:#F6F4EE;display:flex;align-items:center;justify-content:center;font-family:\'Bricolage Grotesque\',sans-serif;font-weight:800;font-size:32px">P</div>'
+        + '<div style="font-size:17px;color:#4A443A;max-width:26ch;line-height:1.5">PlanIA CV está en pausa temporalmente. Vuelve pronto.</div>'
+        + '<a href="acerca-de.dc.html" style="font-size:13px;font-weight:600;color:#4A6C87;text-decoration:none;padding:8px 16px;border:1px solid #CBDCE6;border-radius:9px;background:#E6EEF3">Acerca de</a>';
+      document.body.appendChild(o);
+    }
+  }).catch(function(){});
+</script>
+</helmet>
+
+<div style="font-family:'Public Sans',sans-serif;color:#29251F;min-height:100vh;display:flex;flex-direction:column">
+
+  <header style="display:flex;align-items:center;gap:14px;padding:18px 32px;border-bottom:1px solid #E5E0D3;background:#FBFAF5">
+    <div style="width:36px;height:36px;border-radius:10px;background:#4A6C87;color:#F6F4EE;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:18px">P</div>
+    <div style="display:flex;gap:4px">
+      <sc-for list="{{ idiomaOpts }}" as="o" hint-placeholder-count="2">
+        <button onClick="{{ o.on }}" style="{{ o.st }}">{{ o.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <div style="display:flex;align-items:center;gap:8px"><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:18px;letter-spacing:-0.01em">PlanIA CV</div><span style="font-size:10px;font-weight:700;letter-spacing:0.06em;background:#E6EEF3;color:#33546A;padding:2px 8px;border-radius:999px">BETA</span></div>
+      <div style="font-size:12px;color:#857D6F">Temporalización anual · Educación Infantil y Primaria · Comunitat Valenciana</div>
+    </div>
+    <div style="flex:1"></div>
+    <nav style="display:flex;gap:8px;align-items:center">
+      <a href="plania-cv.dc.html" style="font-size:12.5px;font-weight:600;color:#6B6355;text-decoration:none;padding:7px 12px;border:1px solid #E5E0D3;border-radius:9px;background:#FFFFFF">{{ t.herramienta }}</a>
+      <a href="base-documental.dc.html" style="font-size:12.5px;font-weight:600;color:#6B6355;text-decoration:none;padding:7px 12px;border:1px solid #E5E0D3;border-radius:9px;background:#FFFFFF">{{ t.baseDoc }}</a>
+      <a href="mailto:sentia.edu@gmail.com?subject=Feedback%20PlanIA%20CV" style="font-size:12.5px;font-weight:600;color:#6B6355;text-decoration:none;padding:7px 12px;border:1px solid #E5E0D3;border-radius:9px;background:#FFFFFF">¿Feedback?</a>
+    </nav>
+  </header>
+
+  <div style="background:#E6EEF3;color:#33546A;font-size:12px;font-weight:500;text-align:center;padding:8px 32px;line-height:1.5;border-bottom:1px solid #CBDCE6">{{ t.rgpd }}</div>
+
+  <main style="flex:1;max-width:760px;width:100%;margin:0 auto;padding:48px 32px">
+    <div style="font-size:12px;font-weight:700;color:#4A6C87;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">{{ t.eyebrow }}</div>
+    <h1 style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:34px;line-height:1.15;margin:0 0 20px;letter-spacing:-0.02em">PlanIA CV</h1>
+    <p style="font-size:16px;line-height:1.65;color:#4A443A;margin:0 0 32px;max-width:60ch">{{ t.intro }}</p>
+
+    <div style="display:grid;gap:1px;background:#E5E0D3;border:1px solid #E5E0D3;border-radius:14px;overflow:hidden">
+      <div style="background:#FFFFFF;padding:18px 22px;display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline">
+        <div style="font-size:12px;font-weight:700;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ t.autor }}</div>
+        <div style="font-size:16px;font-weight:600">David Martínez López</div>
+      </div>
+      <div style="background:#FFFFFF;padding:18px 22px;display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline">
+        <div style="font-size:12px;font-weight:700;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ t.proyecto }}</div>
+        <div style="font-size:16px;font-weight:600;font-style:italic;color:#4A6C87">{{ t.proyectoVal }}</div>
+      </div>
+      <div style="background:#FFFFFF;padding:18px 22px;display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline">
+        <div style="font-size:12px;font-weight:700;color:#857D6F;letter-spacing:0.05em;text-transform:uppercase">{{ t.aviso }}</div>
+        <div style="font-size:15px;line-height:1.6;color:#4A443A">{{ t.avisoTexto }}</div>
+      </div>
+    </div>
+  </main>
+
+  <footer style="max-width:1480px;width:100%;margin:24px auto 0;padding:18px 32px;border-top:1px solid #E5E0D3;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13px;color:#29251F">PlanIA CV</div>
+    <div style="font-size:12px;color:#857D6F">{{ t.creadoPor }}</div>
+    <div style="flex:1"></div>
+    <div style="font-size:12px;color:#4A6C87;font-style:italic">{{ t.proyecto }} {{ t.proyectoVal }}</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { idioma: 'es' };
+
+  componentDidMount() {
+    try {
+      const idi = localStorage.getItem('planiacv_idioma');
+      if (idi === 'es' || idi === 'va') this.setState({ idioma: idi });
+    } catch (e) {}
+    this._onStorage = e => {
+      if (e.key === 'planiacv_idioma' && (e.newValue === 'es' || e.newValue === 'va')) {
+        this.setState({ idioma: e.newValue });
+      }
+    };
+    window.addEventListener('storage', this._onStorage);
+  }
+  componentWillUnmount() { if (this._onStorage) window.removeEventListener('storage', this._onStorage); }
+
+  renderVals() {
+    const st = this.state;
+    const T = {
+      es: {
+        herramienta: 'Herramienta', baseDoc: 'Base documental',
+        rgpd: 'No introduzca nombres de alumnos ni datos personales. PlanIA CV trabaja exclusivamente con información curricular y organizativa.',
+        eyebrow: 'Acerca de',
+        intro: 'PlanIA CV es una herramienta de apoyo para la planificación anual y temporalización curricular de Educación Infantil y Primaria de la Comunitat Valenciana.',
+        autor: 'Autor', proyecto: 'Proyecto', proyectoVal: 'Sentia: Sentir, enseñar, transformar',
+        aviso: 'Aviso', avisoTexto: 'La herramienta no sustituye la normativa oficial ni el criterio profesional docente.',
+        creadoPor: 'Creado por David Martínez López · 2026'
+      },
+      va: {
+        herramienta: 'Ferramenta', baseDoc: 'Base documental',
+        rgpd: 'No introduïsca noms d\'alumnes ni dades personals. PlanIA CV treballa exclusivament amb informació curricular i organitzativa.',
+        eyebrow: 'Quant a',
+        intro: 'PlanIA CV és una ferramenta de suport per a la planificació anual i temporalització curricular d\'Educació Infantil i Primària de la Comunitat Valenciana.',
+        autor: 'Autor', proyecto: 'Projecte', proyectoVal: 'Sentia: Sentir, ensenyar, transformar',
+        aviso: 'Avís', avisoTexto: 'La ferramenta no substituïx la normativa oficial ni el criteri professional docent.',
+        creadoPor: 'Creat per David Martínez López · 2026'
+      }
+    };
+    const tx = T[st.idioma];
+    const segLang = (val, label) => ({
+      label, on: () => { try { localStorage.setItem('planiacv_idioma', val); } catch (e) {} this.setState({ idioma: val }); },
+      st: 'padding:5px 11px;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:0.04em;' + (st.idioma === val ? 'background:#29251F;color:#F6F4EE;border:1px solid #29251F' : 'background:#FCFBF7;color:#6B6355;border:1px solid #E5E0D3')
+    });
+    return { t: tx, idiomaOpts: [segLang('es', 'ES'), segLang('va', 'VA')] };
+  }
+}
+</script>
+</body>
+</html>
